@@ -122,6 +122,7 @@ end
 end
 end
 local function Teleport(Target)
+    if not workspace:Raycast(Target, Vector3.new(0, 750, 0), RaycastParams) then
  if (user.Character.HumanoidRootPart.Position - Target.Position).Magnitude < 100 then
 util:Move_To_Position(Target, Player_Speed, user.Character.HumanoidRootPart, true)
 return
@@ -136,6 +137,7 @@ end
 else
 util:GrabVehicle(Target, Player_Speed)
 return
+end
 end
 end
 return Teleport

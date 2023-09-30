@@ -138,7 +138,7 @@ task.wait()
 end
 end)
  for i = 0, 1, (SPEED_LIMITER / distance) * WAIT_SPEED do
-     if Part.Seat.PlayerName.Value == user.Name then
+     if not Part:FindFirstChild('Seat') or not Part.Seat:FindFirstChild('PlayerName') or Part.Seat.PlayerName.Value == user.Name then
    local new_position = start:lerp(target, i)
    root_part:PivotTo(new_position)
    Part.CFrame = CFrame.new(Part.CFrame.X, y_level, Part.CFrame.Z)
@@ -147,8 +147,8 @@ root_part.Velocity = Vector3.new()
    end
  end
  Part:PivotTo(CFrame.new(Part.Position.X, vector_position.Y, Part.Position.Z))
-wait(1)
-repeat
+ repeat task.wait() until (Part.Position - Target.Position).Magnitude < 25 and Part.Seat.PlayerName.Value == user.Name
+ repeat
                 task.wait(0.15)
                 require(game:GetService("ReplicatedStorage").Game.CharacterUtil).OnJump()
             until not Part:FindFirstChild('Seat') or not Part.Seat:FindFirstChild("Part") or Part.Seat.PlayerName.Value ~= user.Name

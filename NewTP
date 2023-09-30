@@ -205,7 +205,7 @@ return
 end
 end
 function utilities:Get_Nearest_Vehicle()
-local dist = math.huge
+local distance = math.huge
 local nearest
 local UI = require(game:GetService("ReplicatedStorage").Module:WaitForChild("UI"))
     for index, action in next, UI.CircleAction.Specs do

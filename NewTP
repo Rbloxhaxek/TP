@@ -1,3 +1,4 @@
+-- Inspired by Introvert1337 :)
 require(game:GetService("ReplicatedStorage").Tag.TagUtils).isPointInTag = newcclosure(function(a, xD)
 if xD == "NoFallDamage" or xD == "NoRagdoll" or xD == "NoParachute" then
 return true
@@ -24,6 +25,14 @@ user.CharacterAdded:Connect(function(character)
 end)
 function util:Move_To_Position(Target, Speed, Part, TeleportUp, Vehicle)
 -- BTW half of this stuff was stolen off of vermillion & github but its just to look cool
+ local relative_position = (Target.Position - user.Character.HumanoidRootPart.Position);
+    local target_distance = relative_position.Magnitude;
+
+    if target_distance <= 20 and not workspace:Raycast(user.Character.HumanoidRootPart.Position, relative_position.Unit * target_distance, RaycastParams) then 
+        user.Character.HumanoidRootPart.CFrame = cframe; 
+        
+        return;
+    end; 
  local vector_position = Target.Position
  local y_level = 750
     local higher_position = Vector3.new(vector_position.X, y_level, vector_position.Z)
@@ -32,7 +41,6 @@ local SPEED_LIMITER = Speed
  local target = Target
  local start = root_part.CFrame
  local distance = (target.p - start.p).magnitude
- 
 task.spawn(function()
 if TeleportUp ~= nil then
  repeat
@@ -53,6 +61,11 @@ root_part.Velocity = Vector3.new()
    wait(WAIT_SPEED)
  end
  Part:PivotTo(CFrame.new(Part.Position.X, vector_position.Y, Part.Position.Z))
+require(game:GetService("ReplicatedStorage").Tag.TagUtils).isPointInTag = newcclosure(function(a, xD)
+if xD == "NoFallDamage" or xD == "NoRagdoll" or xD == "NoParachute" then
+return false
+end
+end)
 end
 function util:GrabVehicle(Target, Speed)
     for i,v in pairs(workspace.Vehicles:GetChildren()) do
@@ -101,6 +114,10 @@ end
 end
 end
 local function Teleport(Target)
+ if (user.Character.HumanoidRootPart.Position - Target.Position).Magnitude < 100 then
+util:Move_To_Position(Target, Player_Speed, user.Character.HumanoidRootPart, true)
+return
+end
     if user.Character.Humanoid:GetState() == Enum.HumanoidStateType.Seated then
 for i,v in pairs(workspace.Vehicles:GetChildren()) do
 if v:FindFirstChild("_VehicleState_"..game:GetService("Players").LocalPlayer.Name) then

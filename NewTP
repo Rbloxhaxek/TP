@@ -100,7 +100,7 @@ end
 end
 end
 end
-function Teleport(Target)
+local function Teleport(Target)
     if user.Character.Humanoid:GetState() == Enum.HumanoidStateType.Seated then
 for i,v in pairs(workspace.Vehicles:GetChildren()) do
 if v:FindFirstChild("_VehicleState_"..game:GetService("Players").LocalPlayer.Name) then

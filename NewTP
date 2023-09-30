@@ -54,9 +54,8 @@ end)
     end
 
     table.insert(triedDoors, nearest)
-
+if nearest ~= nil then
     utilities:toggle_door_collision(nearest.instance, false)
-
     local path = Path
     path:ComputeAsync(user.Character.HumanoidRootPart.Position, nearest.position)
 
@@ -68,7 +67,7 @@ end)
             
             user.Character.HumanoidRootPart.CFrame = CFrame.new(waypoint.Position + Vector3.new(0, 2.5, 0))
 
-            if not workspace:Raycast(user.Character.HumanoidRootPart.Position, Vector3.new(0, 750, 0), RaycastParams) then
+            if not workspace:Raycast(user.Character.HumanoidRootPart.Position, Vector3.new(0, 9e9, 0), RaycastParams) then
                 utilities:toggle_door_collision(nearest.instance, true)
 
                 return
@@ -82,6 +81,7 @@ end)
 
     movement:pathfind(triedDoors)
 end
+end
 for index, value in next, workspace:GetDescendants() do
     if value.Name:sub(-4, -1) == "Door" and not value:IsDescendantOf(workspace:WaitForChild("MansionRobbery"), math.huge) then 
         local touch_part = value:FindFirstChild("Touch");
@@ -90,11 +90,11 @@ for index, value in next, workspace:GetDescendants() do
             for distance = 5, 100, 5 do 
                 local forward_position, backward_position = touch_part.Position + touch_part.CFrame.LookVector * (distance + 3), touch_part.Position + touch_part.CFrame.LookVector * -(distance + 3); -- distance + 3 studs forward and backward from the door
                 
-                if not workspace:Raycast(forward_position, Vector3.new(0, 750, 0), RaycastParams) then
+                if not workspace:Raycast(forward_position, Vector3.new(0, 9e9, 0), RaycastParams) then
                     table.insert(door_positions, { instance = value, position = forward_position });
 
                     break;
-                elseif not workspace:Raycast(backward_position, Vector3.new(0, 750, 0), RaycastParams) then
+                elseif not workspace:Raycast(backward_position, Vector3.new(0, 9e9, 0), RaycastParams) then
                     table.insert(door_positions, { instance = value, position = backward_position });
 
                     break;
@@ -104,7 +104,7 @@ for index, value in next, workspace:GetDescendants() do
     end;
 end;
 function utilities:Move_To_Position(Target, Speed, Part, TeleportUp, Vehicle)
-    if not Vehicle and workspace:Raycast(Part.Position, Vector3.new(0, 750, 0), RaycastParams) then
+    if not Vehicle and workspace:Raycast(Part.Position, Vector3.new(0, 9e9, 0), RaycastParams) then
         movement:pathfind();
         task.wait(0.5);
     end;
@@ -153,7 +153,7 @@ repeat
 end
 function utilities:GrabVehicle(Target, Speed)
     for i,v in pairs(workspace.Vehicles:GetChildren()) do
-if v.Name == "Camaro" and not workspace:Raycast(v.Seat.Position, Vector3.new(0, 750, 0), RaycastParams) and not table.find(tried, v) then
+if v.Name == "Camaro" and not workspace:Raycast(v.Seat.Position, Vector3.new(0, 9e9, 0), RaycastParams) and not table.find(tried, v) then
  local relative_position = (Target.Position - user.Character.HumanoidRootPart.Position)
     local target_distance = relative_position.Magnitude
         local vehicle_distance = (v.Seat.Position - user.Character.HumanoidRootPart.Position).Magnitude
@@ -206,7 +206,7 @@ end
 end
 end
 local function Teleport(Target)
-    if not workspace:Raycast(Target.Position, Vector3.new(0, 750, 0), RaycastParams) then
+    if not workspace:Raycast(Target.Position, Vector3.new(0, 9e9, 0), RaycastParams) then
  if (user.Character.HumanoidRootPart.Position - Target.Position).Magnitude < 100 then
 utilities:Move_To_Position(Target, Player_Speed, user.Character.HumanoidRootPart, true)
 return

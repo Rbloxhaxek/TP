@@ -1,10 +1,23 @@
 -- hi lmao, welcome to some ugly code. most of this is copied from other stuff
-local util = {}
+local utilities = {}
 local user = game:GetService("Players").LocalPlayer
+local pathfinding_service = game:GetService("PathfindingService")
+local Path = pathfinding_service:CreatePath()
+local movement = {}
+local triedDoors = {}
  local WAIT_SPEED = 1 / 45
  local Vehicle_Speed = 600
  local Player_Speed = 175
  local tried = {}
+ local door_positions = { }
+ function utilities:toggle_door_collision(door, toggle)
+    for index, child in next, door.Model:GetChildren() do 
+        if child:IsA("BasePart") then 
+            child.CanCollide = toggle;
+        end; 
+    end;
+end;
+
  local RaycastParams = RaycastParams.new()
  RaycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 RaycastParams.FilterDescendantsInstances = { user.Character, workspace.Vehicles, workspace:FindFirstChild("Rain")}
@@ -18,19 +31,90 @@ end)
 user.CharacterAdded:Connect(function(character)
     table.insert(RaycastParams.FilterDescendantsInstances, character)
 end)
-function util:Move_To_Position(Target, Speed, Part, TeleportUp, Vehicle)
+  function movement:pathfind(tried)
+    local distance = math.huge
+    local nearest
+
+    for index, value in next, door_positions do
+        if not table.find(triedDoors, value) then
+            local magnitude = (value.position - user.Character.HumanoidRootPart.Position).Magnitude
+            
+            if magnitude < distance then 
+                distance = magnitude
+                nearest = value
+            end
+        end
+    end
+
+    table.insert(triedDoors, nearest)
+
+    utilities:toggle_door_collision(nearest.instance, false)
+
+    local path = Path
+    path:ComputeAsync(user.Character.HumanoidRootPart.Position, nearest.position)
+
+    if path.Status == Enum.PathStatus.Success then
+        local waypoints = path:GetWaypoints()
+
+        for index = 1, #waypoints do 
+            local waypoint = waypoints[index]
+            
+            user.Character.HumanoidRootPart.CFrame = CFrame.new(waypoint.Position + Vector3.new(0, 2.5, 0))
+
+            if not workspace:Raycast(user.Character.HumanoidRootPart.Position, Vector3.new(0, 750, 0), RaycastParams) then
+                utilities:toggle_door_collision(nearest.instance, true)
+
+                return
+            end
+
+            task.wait(0.05)
+        end
+    end
+
+    utilities:toggle_door_collision(nearest.instance, true)
+
+    movement:pathfind(triedDoors)
+end
+for index, value in next, workspace:GetDescendants() do
+    if value.Name:sub(-4, -1) == "Door" and not value:IsDescendantOf(workspace:WaitForChild("MansionRobbery"), math.huge) then 
+        local touch_part = value:FindFirstChild("Touch");
+
+        if touch_part and touch_part:IsA("BasePart") then
+            for distance = 5, 100, 5 do 
+                local forward_position, backward_position = touch_part.Position + touch_part.CFrame.LookVector * (distance + 3), touch_part.Position + touch_part.CFrame.LookVector * -(distance + 3); -- distance + 3 studs forward and backward from the door
+                
+                if not workspace:Raycast(forward_position, Vector3.new(0, 750, 0), RaycastParams) then
+                    table.insert(door_positions, { instance = value, position = forward_position });
+
+                    break;
+                elseif not workspace:Raycast(backward_position, Vector3.new(0, 750, 0), RaycastParams) then
+                    table.insert(door_positions, { instance = value, position = backward_position });
+
+                    break;
+                end;
+            end;
+        end;
+    end;
+end;
+function utilities:Move_To_Position(Target, Speed, Part, TeleportUp, Vehicle)
 require(game:GetService("ReplicatedStorage").Tag.TagUtils).isPointInTag = newcclosure(function(a, xD)
 if xD == "NoFallDamage" or xD == "NoRagdoll" or xD == "NoParachute" then
 return true
 end
-end) local relative_position = (Target.Position - user.Character.HumanoidRootPart.Position);
-    local target_distance = relative_position.Magnitude;
+end)
+    if not Vehicle and workspace:Raycast(Part.Position, Vector3.new(0, 750, 0), RaycastParams) then
+        movement:pathfind();
+        task.wait(0.5);
+    end;
+    
+local relative_position = (Target.Position - user.Character.HumanoidRootPart.Position)
+    local target_distance = relative_position.Magnitude
 
     if target_distance <= 20 and not workspace:Raycast(user.Character.HumanoidRootPart.Position, relative_position.Unit * target_distance, RaycastParams) then 
         user.Character:PivotTo(Target)
         
-        return;
-    end; 
+        return
+    end 
  local vector_position = Target.Position
  local y_level = 750
     local higher_position = Vector3.new(vector_position.X, y_level, vector_position.Z)
@@ -60,23 +144,27 @@ root_part.Velocity = Vector3.new()
  end
  Part:PivotTo(CFrame.new(Part.Position.X, vector_position.Y, Part.Position.Z))
 wait(1)
+repeat
+                task.wait(0.15)
+                require(game:GetService("ReplicatedStorage").Game.CharacterUtil).OnJump()
+            until not Part:FindFirstChild('Seat') or not Part.Seat:FindFirstChild("Part") or Part.Seat.PlayerName.Value ~= user.Name
 require(game:GetService("ReplicatedStorage").Tag.TagUtils).isPointInTag = newcclosure(function(a, xD)
 if xD == "NoFallDamage" or xD == "NoRagdoll" or xD == "NoParachute" then
 return false
 end
 end)
 end
-function util:GrabVehicle(Target, Speed)
+function utilities:GrabVehicle(Target, Speed)
     for i,v in pairs(workspace.Vehicles:GetChildren()) do
 if v.Name == "Camaro" and not workspace:Raycast(v.Seat.Position, Vector3.new(0, 750, 0), RaycastParams) and not table.find(tried, v) then
- local relative_position = (Target.Position - user.Character.HumanoidRootPart.Position);
-    local target_distance = relative_position.Magnitude;
-        local vehicle_distance = (v.Seat.Position - user.Character.HumanoidRootPart.Position).Magnitude;
+ local relative_position = (Target.Position - user.Character.HumanoidRootPart.Position)
+    local target_distance = relative_position.Magnitude
+        local vehicle_distance = (v.Seat.Position - user.Character.HumanoidRootPart.Position).Magnitude
      if target_distance < vehicle_distance then
-util:Move_To_Position(Target, Player_Speed, user.Character.HumanoidRootPart, true)
+utilities:Move_To_Position(Target, Player_Speed, user.Character.HumanoidRootPart, true)
 return
 end
-util:Move_To_Position(v.Seat.CFrame, Speed, user.Character.HumanoidRootPart, true)
+utilities:Move_To_Position(v.Seat.CFrame, Speed, user.Character.HumanoidRootPart, true)
 local Positions = { [1] = v.Seat.Position }
 
 local TweenService = game:GetService("TweenService")
@@ -109,10 +197,10 @@ wait(0.1)
 until Attempts == 10 or not v:FindFirstChild("Seat") or not v.Seat:FindFirstChild('PlayerName') or v.Seat.PlayerName.Value == user.Name
 if not v:FindFirstChild("Seat") or not v.Seat:FindFirstChild("PlayerName") or not v.Seat.PlayerName.Value == user.Name then
 table.insert(tried, v)
- util:GrabVehicle(Target, Player_Speed)
+ utilities:GrabVehicle(Target, Player_Speed)
 return
 else
-util:Move_To_Position(Target, Vehicle_Speed, v.PrimaryPart, true)
+utilities:Move_To_Position(Target, Vehicle_Speed, v.PrimaryPart, true, true)
 return
 end
 end
@@ -121,18 +209,18 @@ end
 local function Teleport(Target)
     if not workspace:Raycast(Target.Position, Vector3.new(0, 750, 0), RaycastParams) then
  if (user.Character.HumanoidRootPart.Position - Target.Position).Magnitude < 100 then
-util:Move_To_Position(Target, Player_Speed, user.Character.HumanoidRootPart, true)
+utilities:Move_To_Position(Target, Player_Speed, user.Character.HumanoidRootPart, true)
 return
 end
     if user.Character.Humanoid:GetState() == Enum.HumanoidStateType.Seated then
 for i,v in pairs(workspace.Vehicles:GetChildren()) do
 if v:FindFirstChild("_VehicleState_"..game:GetService("Players").LocalPlayer.Name) then
-util:Move_To_Position(Target, Vehicle_Speed, v.PrimaryPart, true)
+utilities:Move_To_Position(Target, Vehicle_Speed, v.PrimaryPart, true, true)
 return
 end
 end
 else
-util:GrabVehicle(Target, Player_Speed)
+utilities:GrabVehicle(Target, Player_Speed)
 return
 end
 end

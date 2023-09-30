@@ -29,7 +29,7 @@ end)
     local target_distance = relative_position.Magnitude;
 
     if target_distance <= 20 and not workspace:Raycast(user.Character.HumanoidRootPart.Position, relative_position.Unit * target_distance, RaycastParams) then 
-        user.Character.HumanoidRootPart.CFrame = cframe; 
+        user.Character:PivotTo(Target)
         
         return;
     end; 

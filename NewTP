@@ -1,9 +1,4 @@
--- Inspired by Introvert1337 :)
-require(game:GetService("ReplicatedStorage").Tag.TagUtils).isPointInTag = newcclosure(function(a, xD)
-if xD == "NoFallDamage" or xD == "NoRagdoll" or xD == "NoParachute" then
-return true
-end
-end)
+-- Inspired by Introvert1337's teleport script :)
 local util = {}
 local user = game:GetService("Players").LocalPlayer
  local WAIT_SPEED = 1 / 45
@@ -24,6 +19,11 @@ user.CharacterAdded:Connect(function(character)
     table.insert(RaycastParams.FilterDescendantsInstances, character)
 end)
 function util:Move_To_Position(Target, Speed, Part, TeleportUp, Vehicle)
+require(game:GetService("ReplicatedStorage").Tag.TagUtils).isPointInTag = newcclosure(function(a, xD)
+if xD == "NoFallDamage" or xD == "NoRagdoll" or xD == "NoParachute" then
+return true
+end
+end)
 -- BTW half of this stuff was stolen off of vermillion & github but its just to look cool
  local relative_position = (Target.Position - user.Character.HumanoidRootPart.Position);
     local target_distance = relative_position.Magnitude;
@@ -61,6 +61,7 @@ root_part.Velocity = Vector3.new()
    wait(WAIT_SPEED)
  end
  Part:PivotTo(CFrame.new(Part.Position.X, vector_position.Y, Part.Position.Z))
+wait(1)
 require(game:GetService("ReplicatedStorage").Tag.TagUtils).isPointInTag = newcclosure(function(a, xD)
 if xD == "NoFallDamage" or xD == "NoRagdoll" or xD == "NoParachute" then
 return false
@@ -70,6 +71,10 @@ end
 function util:GrabVehicle(Target, Speed)
     for i,v in pairs(workspace.Vehicles:GetChildren()) do
 if v.Name == "Camaro" and not workspace:Raycast(v.Seat.Position, Vector3.new(0, 750, 0), RaycastParams) and not table.find(tried, v) then
+     if Target.Position < v.PrimaryPart.Position then
+util:Move_To_Position(Target, Player_Speed, user.Character.HumanoidRootPart, true)
+return
+end
 util:Move_To_Position(v.Seat.CFrame, Speed, user.Character.HumanoidRootPart, true)
 wait(1)
 local Positions = { [1] = v.Seat.Position }

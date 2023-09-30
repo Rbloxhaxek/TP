@@ -1,4 +1,4 @@
--- Inspired by Introvert1337's teleport script :)
+-- hi lmao, welcome to some ugly code. most of this is copied from other stuff
 local util = {}
 local user = game:GetService("Players").LocalPlayer
  local WAIT_SPEED = 1 / 45
@@ -23,9 +23,7 @@ require(game:GetService("ReplicatedStorage").Tag.TagUtils).isPointInTag = newccl
 if xD == "NoFallDamage" or xD == "NoRagdoll" or xD == "NoParachute" then
 return true
 end
-end)
--- BTW half of this stuff was stolen off of vermillion & github but its just to look cool
- local relative_position = (Target.Position - user.Character.HumanoidRootPart.Position);
+end) local relative_position = (Target.Position - user.Character.HumanoidRootPart.Position);
     local target_distance = relative_position.Magnitude;
 
     if target_distance <= 20 and not workspace:Raycast(user.Character.HumanoidRootPart.Position, relative_position.Unit * target_distance, RaycastParams) then 
@@ -79,7 +77,6 @@ util:Move_To_Position(Target, Player_Speed, user.Character.HumanoidRootPart, tru
 return
 end
 util:Move_To_Position(v.Seat.CFrame, Speed, user.Character.HumanoidRootPart, true)
-wait(1)
 local Positions = { [1] = v.Seat.Position }
 
 local TweenService = game:GetService("TweenService")
@@ -92,7 +89,7 @@ task.spawn(function()
 	until not istping
 end)
 for i,v in pairs(Positions) do
-	local Tween = TweenService:Create(game.Players.LocalPlayer.Character.HumanoidRootPart, TweenInfo.new((game.Players.LocalPlayer.Character.HumanoidRootPart.Position-v).Magnitude/75, Enum.EasingStyle.Linear), {CFrame = CFrame.new(v)})
+	local Tween = TweenService:Create(game.Players.LocalPlayer.Character.HumanoidRootPart, TweenInfo.new((game.Players.LocalPlayer.Character.HumanoidRootPart.Position-v).Magnitude/100, Enum.EasingStyle.Linear), {CFrame = CFrame.new(v)})
 	Tween:Play()
 	Tween.Completed:Wait()
 end

@@ -68,7 +68,7 @@ end
 end
 end
 end
-function Teleport(Target, Speed, Part, TeleportUp, Vehicle)
+function MoveToPosition(Target, Speed, Part, TeleportUp, Vehicle)
 -- BTW half of this stuff was stolen off of vermillion & github but its just to look cool
  local vector_position = Target.Position
  local y_level = 750
@@ -78,11 +78,6 @@ local SPEED_LIMITER = Speed
  local target = Target
  local start = root_part.CFrame
  local distance = (target.p - start.p).magnitude
-if user.Character.Humanoid:GetState() == Enum.HumanoidStateType.Seated then
-else
-GrabVehicle(Target, Player_Speed)
-return
-end
 task.spawn(function()
 if TeleportUp ~= nil then
  repeat
@@ -103,4 +98,17 @@ root_part.Velocity = Vector3.new()
    wait(WAIT_SPEED)
  end
  Part:PivotTo(CFrame.new(Part.Position.X, vector_position.Y, Part.Position.Z))
+end
+function Teleport(Target, Speed, Part, TeleportUp, Vehicle)
+if user.Character.Humanoid:GetState() == Enum.HumanoidStateType.Seated then
+for i,v in pairs(workspace.Vehicles:GetChildren()) do
+if v:FindFirstChild("_VehicleState_"..game:GetService("Players").LocalPlayer.Name) then
+Teleport(Target, Vehicle_Speed, v.PrimaryPart, true)
+return
+end
+end
+else
+GrabVehicle(Target, Player_Speed)
+return
+end
 end

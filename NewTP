@@ -204,9 +204,9 @@ utilities:GrabVehicle(Target, Player_Speed)
 return
 end
 end
-function utilities:Get_Nearest_Vehicle()
-local distance = math.huge
-local nearest
+function utilities:Get_Nearest_Vehicle(tried)
+local distance = math.huge;
+local nearest;
 local UI = require(game:GetService("ReplicatedStorage").Module:WaitForChild("UI"))
     for index, action in next, UI.CircleAction.Specs do
         if action.IsVehicle and action.ShouldAllowEntry == true and action.Enabled == true and action.Name == "Enter Driver" then
@@ -231,7 +231,7 @@ local UI = require(game:GetService("ReplicatedStorage").Module:WaitForChild("UI"
 end
 function utilities:GrabVehicle(Target, Speed)
     local tried = tried or { };
-    local nearest_vehicle = utilities:Get_Nearest_Vehicle()
+    local nearest_vehicle = utilities:Get_Nearest_Vehicle(tried)
     local Vehicle = nearest_vehicle and nearest_vehicle.ValidRoot;
  local relative_position = (Target.Position - user.Character.HumanoidRootPart.Position)
     local target_distance = relative_position.Magnitude

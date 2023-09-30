@@ -1,4 +1,4 @@
--- hi lmao, welcome to some ugly code. most of this is copied from other stuff
+-- hi lmao, welcome to some ugly code. most of this is copied from other stuff!
 local utilities = {}
 local user = game:GetService("Players").LocalPlayer
 local pathfinding_service = game:GetService("PathfindingService")
@@ -192,9 +192,11 @@ end
 local Attempts = 1
 repeat
 Attempts = Attempts + 1
+if EnterDriver ~= nil then
 EnterDriver:Callback(true)
+end
 wait(0.1)
-until Attempts == 10 or not v:FindFirstChild("Seat") or not v.Seat:FindFirstChild('PlayerName') or v.Seat.PlayerName.Value == user.Name
+until Attempts == 10 or not v:FindFirstChild("Seat") or not v.Seat:FindFirstChild('PlayerName') or v.Seat.PlayerName.Value == user.Name or EnterDriver == nil
 if not v:FindFirstChild("Seat") or not v.Seat:FindFirstChild("PlayerName") or not v.Seat.PlayerName.Value == user.Name then
 table.insert(tried, v)
  utilities:GrabVehicle(Target, Player_Speed)

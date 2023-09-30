@@ -104,6 +104,7 @@ for index, value in next, workspace:GetDescendants() do
     end;
 end;
 function utilities:Move_To_Position(Target, Speed, Part, TeleportUp, Vehicle)
+    local suc, err = pcall(function()
     if not Vehicle and workspace:Raycast(Part.Position, Vector3.new(0, 9e9, 0), RaycastParams) then
         movement:pathfind();
         task.wait(0.5);
@@ -139,6 +140,7 @@ end
 end)
  for i = 0, 1, (SPEED_LIMITER / distance) * WAIT_SPEED do
      if Vehicle then
+if Part.Parent:FindFirstChild('Seat') and Part.Parent.Seat:FindFirstChild('PlayerName') then
      if Part.Parent.Seat.PlayerName.Value == user.Name then
    local new_position = start:lerp(target, i)
    root_part:PivotTo(new_position)
@@ -146,6 +148,11 @@ end)
 root_part.Velocity = Vector3.new()
    wait(WAIT_SPEED)
      end
+     else
+table.insert(tried, Part)
+utilities:GrabVehicle(Target, Player_Speed)
+return
+end
 else
      local new_position = start:lerp(target, i)
    root_part:PivotTo(new_position)
@@ -164,6 +171,12 @@ end
                 task.wait(0.15)
                 require(game:GetService("ReplicatedStorage").Game.CharacterUtil).OnJump()
  until not Part.Parent.Seat:FindFirstChild('Seat') or not Part.Parent.Seat:FindFirstChild("Part") or Part.Parent.Seat.PlayerName.Value ~= user.Name
+end
+end)
+if err then
+table.insert(tried, Part)
+utilities:GrabVehicle(Target, Player_Speed)
+return
 end
 end
 function utilities:GrabVehicle(Target, Speed)

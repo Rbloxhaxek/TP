@@ -16,6 +16,11 @@ local triedDoors = {}
  local Vehicle_Speed = 600
  local Player_Speed = 175
  local tried = {}
+ local store = require(game:GetService('ReplicatedStorage').App.store)
+ local free_vehicles = {
+Camaro = true,
+Jeep = true
+ }
  local unsupported_vehicles = {
  Volt = true,
  Heli = true,
@@ -117,7 +122,7 @@ for index, value in next, workspace:GetDescendants() do
         end;
     end;
 end;
-function utilities:Move_To_Position(Target, Speed, Part, TeleportUp, Vehicle)
+function utilities:Move_To_Position(Target, Speed, Part, TeleportUp, Vehicle, GrabbingVehicle)
     local suc, err = pcall(function()
     if not Vehicle and workspace:Raycast(Part.Position, Vector3.new(0, 1000, 0), RaycastParams) then
         movement:pathfind();
@@ -154,7 +159,7 @@ end
 end)
  for i = 0, 1, (SPEED_LIMITER / distance) * WAIT_SPEED do
      if Vehicle then
-if Part.Parent:FindFirstChild('Seat') and Part.Parent.Seat:FindFirstChild('PlayerName') then
+if Part.Parent:FindFirstChild('Seat') and (Part.Parent:FindFirstChild('Seat') and Part.Parent.Seat:FindFirstChild('PlayerName') and not Part.Parent.Seat.Player.Value) then
      if Part.Parent.Seat.PlayerName.Value == user.Name then
    local new_position = start:lerp(target, i)
    root_part:PivotTo(new_position)
@@ -168,12 +173,18 @@ utilities:GrabVehicle(Target, Player_Speed)
 return
 end
 else
-     local new_position = start:lerp(target, i)
+        if Part.Parent:FindFirstChild("Seat") and (Part.Parent.Seat:FindFirstChild('Player') and not Part.Parent.Seat.Player.Value) then
+         local new_position = start:lerp(target, i)
    root_part:PivotTo(new_position)
    Part.CFrame = CFrame.new(Part.CFrame.X, y_level, Part.CFrame.Z)
 root_part.Velocity = Vector3.new()
    wait(WAIT_SPEED)
-     end
+        else
+            table.insert(tried, Part)
+utilities:GrabVehicle(Target, Player_Speed)
+    return
+    end
+end
 end
  Part:PivotTo(CFrame.new(Part.Position.X, vector_position.Y, Part.Position.Z))
  repeat task.wait() until (Part.Position - Target.Position).Magnitude < 25
@@ -193,7 +204,7 @@ utilities:GrabVehicle(Target, Player_Speed)
 return
 end
 end
-function utilities:Get_Nearest_Vehicle() -- SOON!
+function utilities:Get_Nearest_Vehicle()
 local dist = math.huge
 local nearest
 local UI = require(game:GetService("ReplicatedStorage").Module:WaitForChild("UI"))
@@ -202,7 +213,7 @@ local UI = require(game:GetService("ReplicatedStorage").Module:WaitForChild("UI"
             local vehicle = action.ValidRoot;
 
             if not table.find(tried, vehicle) and workspace.VehicleSpawns:FindFirstChild(vehicle.Name) then
-                if not unsupported_vehicles[vehicle.Name] and (dependencies.modules.store._state.garageOwned.Vehicles[vehicle.Name] or dependencies.free_vehicles[vehicle.Name]) and not vehicle.Seat.Player.Value then -- check if the vehicle is supported, owned and not already occupied
+                if not unsupported_vehicles[vehicle.Name] and (store._state.garageOwned.Vehicles[vehicle.Name] or free_vehicles[vehicle.Name]) and not vehicle.Seat.Player.Value then
                     if not workspace:Raycast(vehicle.Seat.Position, Vector3.new(0, 1000, 0), RaycastParams) then
                         local magnitude = (vehicle.Seat.Position - user.Character.HumanoidRootPart.Position).Magnitude; 
 
@@ -219,17 +230,18 @@ local UI = require(game:GetService("ReplicatedStorage").Module:WaitForChild("UI"
     return nearest;
 end
 function utilities:GrabVehicle(Target, Speed)
-    for i,v in pairs(workspace.Vehicles:GetChildren()) do
-if v.Name == "Camaro" and not workspace:Raycast(v.Seat.Position, Vector3.new(0, 1000, 0), RaycastParams) and not table.find(tried, v) then
+    local tried = tried or { };
+    local nearest_vehicle = utilities:Get_Nearest_Vehicle()
+    local Vehicle = nearest_vehicle and nearest_vehicle.ValidRoot;
  local relative_position = (Target.Position - user.Character.HumanoidRootPart.Position)
     local target_distance = relative_position.Magnitude
-        local vehicle_distance = (v.Seat.Position - user.Character.HumanoidRootPart.Position).Magnitude
+        local vehicle_distance = (Vehicle.Seat.Position - user.Character.HumanoidRootPart.Position).Magnitude
      if target_distance < vehicle_distance then
 utilities:Move_To_Position(Target, Player_Speed, user.Character.HumanoidRootPart, true)
 return
 end
-utilities:Move_To_Position(v.Seat.CFrame, Speed, user.Character.HumanoidRootPart, true)
-local Positions = { [1] = v.Seat.Position }
+utilities:Move_To_Position(Vehicle.Seat.CFrame, Speed, user.Character.HumanoidRootPart, true, false, true)
+local Positions = { [1] = Vehicle.Seat.Position }
 
 local TweenService = game:GetService("TweenService")
 			
@@ -246,30 +258,24 @@ for i,v in pairs(Positions) do
 	Tween.Completed:Wait()
 end
 istping = false
-local UI = require(game:GetService("ReplicatedStorage").Module:WaitForChild("UI"))
-local EnterDriver
-for x,b in pairs (UI.CircleAction.Specs) do
-if b.IsVehicle and b.ShouldAllowEntry and b.Enabled and b.Name == "Enter Driver" and b.ValidRoot == v then
-EnterDriver = b
-end
-end
-local Attempts = 1
-repeat
-Attempts = Attempts + 1
-if EnterDriver ~= nil then
-EnterDriver:Callback(true)
-end
-wait(0.1)
-until Attempts == 10 or not v:FindFirstChild("Seat") or not v.Seat:FindFirstChild('PlayerName') or v.Seat.PlayerName.Value == user.Name or EnterDriver == nil
-if not v:FindFirstChild("Seat") or not v.Seat:FindFirstChild("PlayerName") or not v.Seat.PlayerName.Value == user.Name then
+            local enter_attempts = 1;
+
+                repeat 
+                    nearest_vehicle:Callback(true)
+                    
+                    enter_attempts = enter_attempts + 1;
+
+                    task.wait(0.1);
+until enter_attempts == 10 or not Vehicle:FindFirstChild("Seat") or not Vehicle.Seat:FindFirstChild('PlayerName') or Vehicle.Seat.PlayerName.Value == user.Name or EnterDriver == nil
+
+
+if not Vehicle:FindFirstChild("Seat") or not Vehicle.Seat:FindFirstChild("PlayerName") or not Vehicle.Seat.PlayerName.Value == user.Name then
 table.insert(tried, v)
- utilities:GrabVehicle(Target, Player_Speed)
+utilities:GrabVehicle(Target, Player_Speed)
 return
 else
-utilities:Move_To_Position(Target, Vehicle_Speed, v.PrimaryPart, true, true)
+utilities:Move_To_Position(Target, Vehicle_Speed, Vehicle.PrimaryPart, true, true)
 return
-end
-end
 end
 end
 local function Teleport(Target)

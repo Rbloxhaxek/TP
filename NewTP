@@ -1,4 +1,11 @@
 -- hi lmao, welcome to some ugly code. most of this is copied from other stuff!
+local old_is_point_in_tag = require(game:GetService("ReplicatedStorage").Tag.TagUtils).isPointInTag
+require(game:GetService("ReplicatedStorage").Tag.TagUtils).isPointInTag = newcclosure(function(a, xD)
+if xD == "NoFallDamage" or xD == "NoRagdoll" or xD == "NoParachute" then
+return true
+end
+    return old_is_point_in_tag(a, xD);
+end)
 local utilities = {}
 local user = game:GetService("Players").LocalPlayer
 local pathfinding_service = game:GetService("PathfindingService")
@@ -97,11 +104,6 @@ for index, value in next, workspace:GetDescendants() do
     end;
 end;
 function utilities:Move_To_Position(Target, Speed, Part, TeleportUp, Vehicle)
-require(game:GetService("ReplicatedStorage").Tag.TagUtils).isPointInTag = newcclosure(function(a, xD)
-if xD == "NoFallDamage" or xD == "NoRagdoll" or xD == "NoParachute" then
-return true
-end
-end)
     if not Vehicle and workspace:Raycast(Part.Position, Vector3.new(0, 750, 0), RaycastParams) then
         movement:pathfind();
         task.wait(0.5);
@@ -148,11 +150,6 @@ repeat
                 task.wait(0.15)
                 require(game:GetService("ReplicatedStorage").Game.CharacterUtil).OnJump()
             until not Part:FindFirstChild('Seat') or not Part.Seat:FindFirstChild("Part") or Part.Seat.PlayerName.Value ~= user.Name
-require(game:GetService("ReplicatedStorage").Tag.TagUtils).isPointInTag = newcclosure(function(a, xD)
-if xD == "NoFallDamage" or xD == "NoRagdoll" or xD == "NoParachute" then
-return false
-end
-end)
 end
 function utilities:GrabVehicle(Target, Speed)
     for i,v in pairs(workspace.Vehicles:GetChildren()) do

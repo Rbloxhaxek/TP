@@ -71,7 +71,10 @@ end
 function util:GrabVehicle(Target, Speed)
     for i,v in pairs(workspace.Vehicles:GetChildren()) do
 if v.Name == "Camaro" and not workspace:Raycast(v.Seat.Position, Vector3.new(0, 750, 0), RaycastParams) and not table.find(tried, v) then
-     if Target.Position < v.PrimaryPart.Position then
+ local relative_position = (Target.Position - user.Character.HumanoidRootPart.Position);
+    local target_distance = relative_position.Magnitude;
+        local vehicle_distance = (v.Seat.Position - user.Character.HumanoidRootPart.Position).Magnitude;
+     if target_distance < vehicle_distance then
 util:Move_To_Position(Target, Player_Speed, user.Character.HumanoidRootPart, true)
 return
 end

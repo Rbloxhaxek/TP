@@ -155,11 +155,16 @@ root_part.Velocity = Vector3.new()
      end
 end
  Part:PivotTo(CFrame.new(Part.Position.X, vector_position.Y, Part.Position.Z))
- repeat task.wait() until (Part.Position - Target.Position).Magnitude < 25 and Part.Seat.PlayerName.Value == user.Name
+ repeat task.wait() until (Part.Position - Target.Position).Magnitude < 25
+ if Vehicle then
+ repeat task.wait() until Part.PrimaryPart.Seat.PlayerName.Value == user.Name
+ end
+ if Vehicle then
  repeat
                 task.wait(0.15)
                 require(game:GetService("ReplicatedStorage").Game.CharacterUtil).OnJump()
-            until not Part:FindFirstChild('Seat') or not Part.Seat:FindFirstChild("Part") or Part.Seat.PlayerName.Value ~= user.Name
+ until not Part.Parent.Seat:FindFirstChild('Seat') or not Part.Parent.Seat:FindFirstChild("Part") or Part.Parent.Seat.PlayerName.Value ~= user.Name
+end
 end
 function utilities:GrabVehicle(Target, Speed)
     for i,v in pairs(workspace.Vehicles:GetChildren()) do

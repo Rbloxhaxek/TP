@@ -16,6 +16,20 @@ local triedDoors = {}
  local Vehicle_Speed = 600
  local Player_Speed = 175
  local tried = {}
+ local unsupported_vehicles = {
+ Volt = true,
+ Heli = true,
+ BlackHawk = true
+ Drone = true,
+ EscapeBot = true,
+ UFO = true,
+ Celsior = true,
+ Jet = true,
+ LittleBird = true,
+ Lia = true,
+ CrewCapsule = true,
+ Stunt = true
+ }
  local door_positions = { }
  function utilities:toggle_door_collision(door, toggle)
     for index, child in next, door.Model:GetChildren() do 
@@ -67,7 +81,7 @@ if nearest ~= nil then
             
             user.Character.HumanoidRootPart.CFrame = CFrame.new(waypoint.Position + Vector3.new(0, 2.5, 0))
 
-            if not workspace:Raycast(user.Character.HumanoidRootPart.Position, Vector3.new(0, 9e9, 0), RaycastParams) then
+            if not workspace:Raycast(user.Character.HumanoidRootPart.Position, Vector3.new(0, 1000, 0), RaycastParams) then
                 utilities:toggle_door_collision(nearest.instance, true)
 
                 return
@@ -90,11 +104,11 @@ for index, value in next, workspace:GetDescendants() do
             for distance = 5, 100, 5 do 
                 local forward_position, backward_position = touch_part.Position + touch_part.CFrame.LookVector * (distance + 3), touch_part.Position + touch_part.CFrame.LookVector * -(distance + 3); -- distance + 3 studs forward and backward from the door
                 
-                if not workspace:Raycast(forward_position, Vector3.new(0, 9e9, 0), RaycastParams) then
+                if not workspace:Raycast(forward_position, Vector3.new(0, 1000, 0), RaycastParams) then
                     table.insert(door_positions, { instance = value, position = forward_position });
 
                     break;
-                elseif not workspace:Raycast(backward_position, Vector3.new(0, 9e9, 0), RaycastParams) then
+                elseif not workspace:Raycast(backward_position, Vector3.new(0, 1000, 0), RaycastParams) then
                     table.insert(door_positions, { instance = value, position = backward_position });
 
                     break;
@@ -105,7 +119,7 @@ for index, value in next, workspace:GetDescendants() do
 end;
 function utilities:Move_To_Position(Target, Speed, Part, TeleportUp, Vehicle)
     local suc, err = pcall(function()
-    if not Vehicle and workspace:Raycast(Part.Position, Vector3.new(0, 9e9, 0), RaycastParams) then
+    if not Vehicle and workspace:Raycast(Part.Position, Vector3.new(0, 1000, 0), RaycastParams) then
         movement:pathfind();
         task.wait(0.5);
     end;
@@ -179,9 +193,34 @@ utilities:GrabVehicle(Target, Player_Speed)
 return
 end
 end
+function utilities:Get_Nearest_Vehicle() -- SOON!
+local dist = math.huge
+local nearest
+local UI = require(game:GetService("ReplicatedStorage").Module:WaitForChild("UI"))
+    for index, action in next, UI.CircleAction.Specs do
+        if action.IsVehicle and action.ShouldAllowEntry == true and action.Enabled == true and action.Name == "Enter Driver" then
+            local vehicle = action.ValidRoot;
+
+            if not table.find(tried, vehicle) and workspace.VehicleSpawns:FindFirstChild(vehicle.Name) then
+                if not unsupported_vehicles[vehicle.Name] and (dependencies.modules.store._state.garageOwned.Vehicles[vehicle.Name] or dependencies.free_vehicles[vehicle.Name]) and not vehicle.Seat.Player.Value then -- check if the vehicle is supported, owned and not already occupied
+                    if not workspace:Raycast(vehicle.Seat.Position, Vector3.new(0, 1000, 0), RaycastParams) then
+                        local magnitude = (vehicle.Seat.Position - user.Character.HumanoidRootPart.Position).Magnitude; 
+
+                        if magnitude < distance then 
+                            distance = magnitude;
+                            nearest = action;
+                        end;
+                    end;
+                end;
+            end;
+        end;
+    end;
+
+    return nearest;
+end
 function utilities:GrabVehicle(Target, Speed)
     for i,v in pairs(workspace.Vehicles:GetChildren()) do
-if v.Name == "Camaro" and not workspace:Raycast(v.Seat.Position, Vector3.new(0, 9e9, 0), RaycastParams) and not table.find(tried, v) then
+if v.Name == "Camaro" and not workspace:Raycast(v.Seat.Position, Vector3.new(0, 1000, 0), RaycastParams) and not table.find(tried, v) then
  local relative_position = (Target.Position - user.Character.HumanoidRootPart.Position)
     local target_distance = relative_position.Magnitude
         local vehicle_distance = (v.Seat.Position - user.Character.HumanoidRootPart.Position).Magnitude
@@ -234,7 +273,7 @@ end
 end
 end
 local function Teleport(Target)
-    if not workspace:Raycast(Target.Position, Vector3.new(0, 9e9, 0), RaycastParams) then
+    if not workspace:Raycast(Target.Position, Vector3.new(0, 1000, 0), RaycastParams) then
  if (user.Character.HumanoidRootPart.Position - Target.Position).Magnitude < 100 then
 utilities:Move_To_Position(Target, Player_Speed, user.Character.HumanoidRootPart, true)
 return

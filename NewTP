@@ -240,7 +240,7 @@ end);
 
 --// main teleport function (not returning a new function directly because of recursion)
 
-local function teleport(cframe, tried) -- unoptimized
+function dependencies:teleport(cframe, tried) -- unoptimized
 for _, v in pairs(game:GetService("Workspace").Vehicles:GetChildren()) do
 if v:FindFirstChild('_VehicleState_'..game:GetService('Players').LocalPlayer.Name) then
 movement:move_to_position(v.PrimaryPart, cframe, dependencies.variables.vehicle_speed);

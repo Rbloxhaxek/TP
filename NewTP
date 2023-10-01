@@ -196,7 +196,7 @@ end;
 --// get all positions near a door which have no collision above them
 
 for index, value in next, workspace:GetDescendants() do
-    if value.Name:sub(-4, -1) == "Door" then 
+    if value.Name:sub(-4, -1) == "Door" and not v:IsDescendantOf(workspace:WaitForChild('MansionRobbery', math.huge)) then 
         local touch_Part = value:FindFirstChild("Touch");
 
         if touch_Part and touch_Part:IsA("BasePart") then

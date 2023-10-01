@@ -173,7 +173,8 @@ utilities:GrabVehicle(Target, Player_Speed)
 return
 end
 else
-        if Part.Parent:FindFirstChild("Seat") and (Part.Parent.Seat:FindFirstChild('Player') and not Part.Parent.Seat.Player.Value) then
+        if Part.Parent:FindFirstChild("Seat") and GrabbingVehicle == true then
+            if Part.Parent.Seat:FindFirstChild('Player') and not Part.Parent.Seat.Player.Value then
          local new_position = start:lerp(target, i)
    root_part:PivotTo(new_position)
    Part.CFrame = CFrame.new(Part.CFrame.X, y_level, Part.CFrame.Z)
@@ -183,6 +184,13 @@ root_part.Velocity = Vector3.new()
             table.insert(tried, Part)
 utilities:GrabVehicle(Target, Player_Speed)
     return
+            end
+ else
+             local new_position = start:lerp(target, i)
+   root_part:PivotTo(new_position)
+   Part.CFrame = CFrame.new(Part.CFrame.X, y_level, Part.CFrame.Z)
+root_part.Velocity = Vector3.new()
+   wait(WAIT_SPEED)
     end
 end
 end

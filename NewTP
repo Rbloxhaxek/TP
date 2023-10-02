@@ -73,10 +73,6 @@ local suc, err = pcall(function()
 
     return nearest;
 end)
-if err then
-utilities:get_nearest_vehicle(tried)
-return
-end
 end;
 
 --// function to pathfind to a position with no collision above
@@ -128,10 +124,6 @@ local suc, err = pcall(function()
 
     movement:pathfind(tried);
 end)
-if err then
-movement:pathfind(tried)
-return
-end
 end;
 
 --// function to interpolate characters position to a position
@@ -174,10 +166,6 @@ Part.Velocity = Vector3.new()
  end
  Part:PivotTo(CFrame.new(Part.Position.X, vector_position.Y, Part.Position.Z))
 end)
-if err then
-movement:move_to_position(Part, cframe, speed, car, target_vehicle, tried_vehicles)
-return
-end
 end;
 
 --// raycast filter
@@ -332,7 +320,7 @@ end
     dependencies.variables.teleporting = false;
 end)
 if err then
-dependencies:teleport(cframe, tried)
+dependencies:teleport(cframe)
 return
 end
 end;

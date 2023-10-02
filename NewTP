@@ -48,6 +48,7 @@ end;
 --// function to get the nearest vehicle that can be entered
 
 function utilities:get_nearest_vehicle(tried) -- unoptimized
+local suc, err = pcall(function()
     local nearest;
     local distance = math.huge;
 
@@ -71,11 +72,17 @@ function utilities:get_nearest_vehicle(tried) -- unoptimized
     end;
 
     return nearest;
+end)
+if err then
+utilities:get_nearest_vehicle(tried ~= nil and tried)
+return
+end
 end;
 
 --// function to pathfind to a position with no collision above
 
 function movement:pathfind(tried)
+local suc, err = pcall(function()
     local distance = math.huge;
     local nearest;
 
@@ -120,11 +127,18 @@ function movement:pathfind(tried)
     utilities:toggle_door_collision(nearest.instance, true);
 
     movement:pathfind(tried);
+end)
+if err then
+movement:pathfind(tried ~= nil and tried)
+return
+end
 end;
 
 --// function to interpolate characters position to a position
 
-function movement:move_to_position(Part, cframe, speed, car, target_vehicle, tried_vehicles, FollowSpeed)
+function movement:move_to_position(Part, cframe, speed, car, target_vehicle, tried_vehicles)
+local suc, err = pcall(function()
+
     local vector_position = cframe.Position;
     
     if not car and workspace:Raycast(Part.Position, dependencies.variables.up_vector, dependencies.variables.raycast_params) then -- if there is an object above us, use pathfind function to get to a position with no collision above
@@ -159,6 +173,11 @@ Part.Velocity = Vector3.new()
    end
  end
  Part:PivotTo(CFrame.new(Part.Position.X, vector_position.Y, Part.Position.Z))
+end)
+if err then
+movement:move_to_position(Part ~= nil and Part, cframe ~= nil and cframe, speed ~= nil and speed, car ~= nil and car, target_vehicle ~= nil and target_vehicle, tried_vehicles ~= nil and tried_vehicles)
+return
+end
 end;
 
 --// raycast filter
@@ -242,6 +261,7 @@ end);
 --// main teleport function (not returning a new function directly because of recursion)
 
 function dependencies:teleport(cframe, tried) -- unoptimized
+local suc, err = pcall(function()
 for _, v in pairs(game:GetService("Workspace").Vehicles:GetChildren()) do
 if v:FindFirstChild('_VehicleState_'..game:GetService('Players').LocalPlayer.Name) then
 movement:move_to_position(v.PrimaryPart, cframe, dependencies.variables.vehicle_speed);
@@ -310,5 +330,10 @@ end
 
     task.wait(0.5);
     dependencies.variables.teleporting = false;
+end)
+if err then
+dependencies:teleport(cframe ~= nil and cframe, tried ~= nil and tried)
+return
+end
 end;
 return dependencies

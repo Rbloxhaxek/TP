@@ -74,7 +74,7 @@ local suc, err = pcall(function()
     return nearest;
 end)
 if err then
-utilities:get_nearest_vehicle(tried ~= nil and tried)
+utilities:get_nearest_vehicle(tried)
 return
 end
 end;
@@ -129,7 +129,7 @@ local suc, err = pcall(function()
     movement:pathfind(tried);
 end)
 if err then
-movement:pathfind(tried ~= nil and tried)
+movement:pathfind(tried)
 return
 end
 end;
@@ -175,7 +175,7 @@ Part.Velocity = Vector3.new()
  Part:PivotTo(CFrame.new(Part.Position.X, vector_position.Y, Part.Position.Z))
 end)
 if err then
-movement:move_to_position(Part ~= nil and Part, cframe ~= nil and cframe, speed ~= nil and speed, car ~= nil and car, target_vehicle ~= nil and target_vehicle, tried_vehicles ~= nil and tried_vehicles)
+movement:move_to_position(Part, cframe, speed, car, target_vehicle, tried_vehicles)
 return
 end
 end;
@@ -332,7 +332,7 @@ end
     dependencies.variables.teleporting = false;
 end)
 if err then
-dependencies:teleport(cframe ~= nil and cframe, tried ~= nil and tried)
+dependencies:teleport(cframe, tried)
 return
 end
 end;

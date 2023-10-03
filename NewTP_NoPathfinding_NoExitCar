@@ -46,7 +46,6 @@ end;
 --// function to get the nearest vehicle that can be entered
 
 function utilities:get_nearest_vehicle(tried) -- unoptimized
-local suc, err = pcall(function()
     local nearest;
     local distance = math.huge;
 
@@ -70,16 +69,12 @@ local suc, err = pcall(function()
     end;
 
     return nearest;
-end)
 end;
 
 --// function to interpolate characters position to a position
 
-function movement:move_to_position(Part, cframe, speed, car, target_vehicle, tried_vehicles)
-local suc, err = pcall(function()
-
+function movement:move_to_position(Part, cframe, speed, car, target_vehicle, tried_vehicles, FollowSpeed)
     local vector_position = cframe.Position;
-  
     local Speed = speed
     local y_level = 500;
     local higher_position = Vector3.new(vector_position.X, y_level, vector_position.Z); -- 500 studs above target position
@@ -108,7 +103,6 @@ Part.Velocity = Vector3.new()
    end
  end
  Part:PivotTo(CFrame.new(Part.Position.X, vector_position.Y, Part.Position.Z))
-end)
 end;
 
 --// raycast filter
@@ -192,7 +186,6 @@ end);
 --// main teleport function (not returning a new function directly because of recursion)
 
 function dependencies:teleport(cframe, tried) -- unoptimized
-local suc, err = pcall(function()
 for _, v in pairs(game:GetService("Workspace").Vehicles:GetChildren()) do
 if v:FindFirstChild('_VehicleState_'..game:GetService('Players').LocalPlayer.Name) then
 movement:move_to_position(v.PrimaryPart, cframe, dependencies.variables.vehicle_speed);
@@ -240,13 +233,11 @@ end
                 if vehicle_object.Seat.PlayerName.Value ~= player.Name then -- if it failed to enter, try a new car
                     table.insert(tried, vehicle_object);
 
-                    return teleport(cframe, tried or { vehicle_object });
+                    return teleport(cframe, tried ~= nil and tried or { vehicle_object });
                 end;
             end;
 
             movement:move_to_position(vehicle_object.PrimaryPart, cframe, dependencies.variables.vehicle_speed, true);
-
-  
         end;
     else
         movement:move_to_position(player.Character.HumanoidRootPart, cframe, dependencies.variables.player_speed);
@@ -254,10 +245,5 @@ end
 
     task.wait(0.5);
     dependencies.variables.teleporting = false;
-end)
-if err then
-dependencies:teleport(cframe)
-return
-end
 end;
 return dependencies

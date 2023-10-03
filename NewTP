@@ -293,7 +293,7 @@ end
                 if vehicle_object.Seat.PlayerName.Value ~= player.Name then -- if it failed to enter, try a new car
                     table.insert(tried, vehicle_object);
 
-                    return teleport(cframe, tried or { vehicle_object });
+                    return teleport(cframe, tried ~= nil and tried or { vehicle_object });
                 end;
             end;
 

@@ -187,10 +187,6 @@ end);
 --// main teleport function (not returning a new function directly because of recursion)
 
 function dependencies:teleport(cframe, tried) -- unoptimized
-local vector_position = game:GetService('Players').LocalPlayer.Character.HumanoidRootPart.CFrame.Position;
-local y_level = 400;
-local higher_position = Vector3.new(vector_position.X, y_level, vector_position.Z); -- 500 studs above target position
-game:GetService('Players').LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(game:GetService('Players').LocalPlayer.Character.HumanoidRootPart.CFrame.X, y_level, game:GetService('Players').LocalPlayer.Character.HumanoidRootPart.CFrame.Z)
 for _, v in pairs(game:GetService("Workspace").Vehicles:GetChildren()) do
 if v:FindFirstChild('_VehicleState_'..game:GetService('Players').LocalPlayer.Name) then
 movement:move_to_position(v.PrimaryPart, cframe, dependencies.variables.vehicle_speed);
@@ -201,6 +197,11 @@ repeat
 return
 end
 end
+local vector_position = game:GetService('Players').LocalPlayer.Character.HumanoidRootPart.CFrame.Position;
+local y_level = 400;
+local higher_position = Vector3.new(vector_position.X, y_level, vector_position.Z);
+game:GetService('Players').LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(game:GetService('Players').LocalPlayer.Character.HumanoidRootPart.CFrame.X, y_level, game:GetService('Players').LocalPlayer.Character.HumanoidRootPart.CFrame.Z)
+wait(5)
     local relative_position = (cframe.Position - player.Character.HumanoidRootPart.Position);
     local target_distance = relative_position.Magnitude;
 
@@ -242,7 +243,7 @@ end
                 if vehicle_object.Seat.PlayerName.Value ~= player.Name then -- if it failed to enter, try a new car
                     table.insert(tried, vehicle_object);
 
-                    return teleport(cframe, tried ~= nil and tried or { vehicle_object });
+                    return dependencies:teleport(cframe, tried ~= nil and tried or { vehicle_object });
                 end;
             end;
 

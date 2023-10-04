@@ -75,6 +75,7 @@ end;
 
 function movement:move_to_position(Part, cframe, speed, car, target_vehicle, tried_vehicles, FollowSpeed)
     local vector_position = cframe.Position;
+    
     local Speed = speed
     local y_level = 500;
     local higher_position = Vector3.new(vector_position.X, y_level, vector_position.Z); -- 500 studs above target position
@@ -186,9 +187,17 @@ end);
 --// main teleport function (not returning a new function directly because of recursion)
 
 function dependencies:teleport(cframe, tried) -- unoptimized
+local vector_position = game:GetService('Players').LocalPlayer.Character.HumanoidRootPart.CFrame.Position;
+local y_level = 400;
+local higher_position = Vector3.new(vector_position.X, y_level, vector_position.Z); -- 500 studs above target position
+game:GetService('Players').LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(game:GetService('Players').LocalPlayer.Character.HumanoidRootPart.CFrame.X, y_level, game:GetService('Players').LocalPlayer.Character.HumanoidRootPart.CFrame.Z)
 for _, v in pairs(game:GetService("Workspace").Vehicles:GetChildren()) do
 if v:FindFirstChild('_VehicleState_'..game:GetService('Players').LocalPlayer.Name) then
 movement:move_to_position(v.PrimaryPart, cframe, dependencies.variables.vehicle_speed);
+repeat
+                task.wait(0.15)
+                require(game:GetService("ReplicatedStorage").Game.CharacterUtil).OnJump()
+            until not v:FindFirstChild('Seat') or not v.Seat:FindFirstChild("Part") or v.Seat.PlayerName.Value ~= user.Name
 return
 end
 end
@@ -238,6 +247,11 @@ end
             end;
 
             movement:move_to_position(vehicle_object.PrimaryPart, cframe, dependencies.variables.vehicle_speed, true);
+
+            repeat -- attempt to exit car
+                task.wait(0.15);
+                dependencies.modules.character_util.OnJump();
+            until vehicle_object.Seat.PlayerName.Value ~= player.Name;
         end;
     else
         movement:move_to_position(player.Character.HumanoidRootPart, cframe, dependencies.variables.player_speed);

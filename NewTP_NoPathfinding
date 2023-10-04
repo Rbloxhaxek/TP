@@ -201,8 +201,6 @@ local vector_position = game:GetService('Players').LocalPlayer.Character.Humanoi
 local y_level = 400;
 local higher_position = Vector3.new(vector_position.X, y_level, vector_position.Z);
 game:GetService('Players').LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(game:GetService('Players').LocalPlayer.Character.HumanoidRootPart.CFrame.X, y_level, game:GetService('Players').LocalPlayer.Character.HumanoidRootPart.CFrame.Z)
-wait(1)
-repeat task.wait() until game:GetService('Players').LocalPlayer.Character.Humanoid.FloorMaterial ~= Enum.Material.Air
     local relative_position = (cframe.Position - player.Character.HumanoidRootPart.Position);
     local target_distance = relative_position.Magnitude;
 

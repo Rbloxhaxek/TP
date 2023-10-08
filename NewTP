@@ -277,7 +277,6 @@ repeat
 return
 end
 end
-wait(5)
     local relative_position = (cframe.Position - player.Character.HumanoidRootPart.Position);
     local target_distance = relative_position.Magnitude;
 

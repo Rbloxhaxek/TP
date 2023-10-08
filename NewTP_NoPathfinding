@@ -5,7 +5,6 @@ local players = game:GetService("Players");
 local tween_service = game:GetService("TweenService");
 
 local player = players.LocalPlayer;
-
 local dependencies = {
     variables = {
         up_vector = Vector3.new(0, 500, 0),
@@ -29,7 +28,49 @@ local dependencies = {
     unsupported_vehicles = { SWATVan = true, Wraith = true },
     door_positions = { }    
 };
+--// raycast filter
+local workspacePartIgnore = {
+    [1] = "Rain",
+    [2] = "RainFall",
+    [3] = "RainSnow",
+    [4] = "Plane",
+    [5] = "Items",
+    [6] = "DirtRoad",
+    [7] = "Vehicles",
+    [8] = "VehicleSpawns",
+    [9] = "Trains"
+}
 
+local RCPAR = dependencies.variables.raycast_params
+RCPAR.FilterType = Enum.RaycastFilterType.Blacklist
+local function Ignore(obj)
+    local ignoreList = RCPAR.FilterDescendantsInstances
+    table.insert(ignoreList, obj)
+    RCPAR.FilterDescendantsInstances = ignoreList
+end
+
+local function WorkspaceOnChildAdded(child)
+    if table.find(workspacePartIgnore, child.Name) then
+        Ignore(child)
+    end
+end
+
+for _, child in pairs(game:GetService("Workspace"):GetChildren()) do
+    WorkspaceOnChildAdded(child)
+end
+for _, tree in pairs(game:GetService("CollectionService"):GetTagged("Tree")) do
+    Ignore(tree)
+end
+for _, part in pairs(game:GetService("CollectionService"):GetTagged("NoClipAllowed")) do
+    Ignore(part)
+end
+
+game:GetService("Workspace").ChildAdded:Connect(WorkspaceOnChildAdded)
+game:GetService("CollectionService"):GetInstanceAddedSignal("Tree"):Connect(Ignore)
+game:GetService("CollectionService"):GetInstanceAddedSignal("NoClipAllowed"):Connect(Ignore)
+local function Raycast(origin, direction)
+    return workspace:Raycast(origin, direction, dependencies.variables.raycast_params)
+end
 local movement = { };
 local utilities = { };
 
@@ -55,7 +96,7 @@ function utilities:get_nearest_vehicle(tried) -- unoptimized
 
             if not table.find(tried, vehicle) and workspace.VehicleSpawns:FindFirstChild(vehicle.Name) then
                 if not dependencies.unsupported_vehicles[vehicle.Name] and (dependencies.modules.store._state.garageOwned.Vehicles[vehicle.Name] or dependencies.free_vehicles[vehicle.Name]) and not vehicle.Seat.Player.Value then -- check if the vehicle is supported, owned and not already occupied
-                    if not workspace:Raycast(vehicle.Seat.Position, dependencies.variables.up_vector, dependencies.variables.raycast_params) then
+                    if not Raycast(vehicle.Seat.Position, Vector3.new(0, 1000, 0)) then
                         local magnitude = (vehicle.Seat.Position - player.Character.HumanoidRootPart.Position).Magnitude; 
 
                         if magnitude < distance then 
@@ -75,7 +116,6 @@ end;
 
 function movement:move_to_position(Part, cframe, speed, car, target_vehicle, tried_vehicles, FollowSpeed)
     local vector_position = cframe.Position;
-    
     local Speed = speed
     local y_level = 500;
     local higher_position = Vector3.new(vector_position.X, y_level, vector_position.Z); -- 500 studs above target position
@@ -105,22 +145,6 @@ Part.Velocity = Vector3.new()
  end
  Part:PivotTo(CFrame.new(Part.Position.X, vector_position.Y, Part.Position.Z))
 end;
-
---// raycast filter
-
-dependencies.variables.raycast_params.FilterType = Enum.RaycastFilterType.Blacklist;
-dependencies.variables.raycast_params.FilterDescendantsInstances = { player.Character, workspace.Vehicles, workspace:FindFirstChild("Rain") };
-
-workspace.ChildAdded:Connect(function(child) -- if it starts raining, add rain to collision ignore list
-    if child.Name == "Rain" then 
-        table.insert(dependencies.variables.raycast_params.FilterDescendantsInstances, child);
-    end;
-end);
-
-player.CharacterAdded:Connect(function(character) -- when the player respawns, add character back to collision ignore list
-    table.insert(dependencies.variables.raycast_params.FilterDescendantsInstances, character);
-end);
-
 --// get free vehicles, owned helicopters, motorcycles and unsupported/new vehicles
 
 for index, vehicle_data in next, dependencies.modules.vehicle_data do
@@ -149,11 +173,11 @@ for index, value in next, workspace:GetDescendants() do
             for distance = 5, 100, 5 do 
                 local forward_position, backward_position = touch_Part.Position + touch_Part.CFrame.LookVector * (distance + 3), touch_Part.Position + touch_Part.CFrame.LookVector * -(distance + 3); -- distance + 3 studs forward and backward from the door
                 
-                if not workspace:Raycast(forward_position, dependencies.variables.up_vector, dependencies.variables.raycast_params) then -- if there is nothing above the forward position from the door
+                if not Raycast(forward_position, Vector3.new(0, 1000, 0)) then -- if there is nothing above the forward position from the door
                     table.insert(dependencies.door_positions, { instance = value, position = forward_position });
 
                     break;
-                elseif not workspace:Raycast(backward_position, dependencies.variables.up_vector, dependencies.variables.raycast_params) then -- if there is nothing above the backward position from the door
+                elseif not Raycast(backward_position, Vector3.new(0, 1000, 0)) then -- if there is nothing above the backward position from the door
                     table.insert(dependencies.door_positions, { instance = value, position = backward_position });
 
                     break;
@@ -197,10 +221,11 @@ repeat
 return
 end
 end
+wait(5)
     local relative_position = (cframe.Position - player.Character.HumanoidRootPart.Position);
     local target_distance = relative_position.Magnitude;
 
-    if target_distance <= 20 and not workspace:Raycast(player.Character.HumanoidRootPart.Position, relative_position.Unit * target_distance, dependencies.variables.raycast_params) then 
+    if target_distance <= 20 and not Raycast(player.Character.HumanoidRootPart.Position, relative_position.Unit * target_distance, dependencies.variables.raycast_params) then 
         player.Character.HumanoidRootPart.CFrame = cframe; 
         
         return;

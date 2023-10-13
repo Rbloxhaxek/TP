@@ -8,7 +8,7 @@ local tween_service = game:GetService("TweenService");
 local player = players.LocalPlayer;
 local dependencies = {
     variables = {
-        up_vector = Vector3.new(0, 800, 0),
+        up_vector = Vector3.new(0, 5000, 0),
         raycast_params = RaycastParams.new(),
         player_speed = 150, 
         vehicle_speed = 450,
@@ -117,7 +117,7 @@ end;
 
 function movement:move_to_position(Part, cframe, speed, car, target_vehicle, tried_vehicles, FollowSpeed)
     local vector_position = cframe.Position;
-    local Speed = speed
+    local Speed = car and dependencies.variables.vehicle_speed or dependencies.variables.player_speed
     local y_level = 500;
     local higher_position = Vector3.new(vector_position.X, y_level, vector_position.Z); -- 500 studs above target position
  local start = Part.CFrame
@@ -125,7 +125,6 @@ function movement:move_to_position(Part, cframe, speed, car, target_vehicle, tri
 task.spawn(function()
 if TeleportUp ~= nil then
  repeat
-     Speed = car == true and dependencies.variables.vehicle_speed or dependencies.variables.player_speed
 Part.CFrame = CFrame.new(Part.CFrame.X, y_level, Part.CFrame.Z)
 Part.Velocity = Vector3.new()
 
@@ -215,10 +214,10 @@ function dependencies:teleport(cframe, tried) -- unoptimized
 for _, v in pairs(game:GetService("Workspace").Vehicles:GetChildren()) do
 if v:FindFirstChild('_VehicleState_'..game:GetService('Players').LocalPlayer.Name) then
 movement:move_to_position(v.PrimaryPart, cframe, dependencies.variables.vehicle_speed);
-repeat
-                task.wait(0.15)
-                require(game:GetService("ReplicatedStorage").Game.CharacterUtil).OnJump()
-            until not v:FindFirstChild('Seat') or not v.Seat:FindFirstChild("Part") or v.Seat.PlayerName.Value ~= user.Name
+repeat -- attempt to exit car
+task.wait(0.15);
+dependencies.modules.character_util.OnJump();
+until vehicle_object.Seat.PlayerName.Value ~= player.Name;
 return
 end
 end
@@ -244,7 +243,8 @@ end
             movement:move_to_position(player.Character.HumanoidRootPart, cframe, dependencies.variables.player_speed);
         else 
             if vehicle_object.Seat.PlayerName.Value ~= player.Name then
-                movement:move_to_position(player.Character.HumanoidRootPart, vehicle_object.Seat.CFrame, dependencies.variables.player_speed, false, vehicle_object, tried);
+local Speed = dependencies.variables.player_speed
+                movement:move_to_position(player.Character.HumanoidRootPart, vehicle_object.Seat.CFrame, Speed, false, vehicle_object, tried);
 
                 dependencies.variables.stopVelocity = true;
 

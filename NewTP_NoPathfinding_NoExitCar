@@ -1,4 +1,5 @@
 -- This is introvert1337's teleport script but using lerp. Have fun!
+-- also if you came from my auto-rob using some loadstring logger you're a loser.
 local replicated_storage = game:GetService("ReplicatedStorage");
 local run_service = game:GetService("RunService");
 local players = game:GetService("Players");
@@ -217,7 +218,6 @@ movement:move_to_position(v.PrimaryPart, cframe, dependencies.variables.vehicle_
 return
 end
 end
-wait(5)
     local relative_position = (cframe.Position - player.Character.HumanoidRootPart.Position);
     local target_distance = relative_position.Magnitude;
 

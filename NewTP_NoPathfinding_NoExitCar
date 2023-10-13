@@ -117,7 +117,7 @@ end;
 
 function movement:move_to_position(Part, cframe, speed, car, target_vehicle, tried_vehicles, FollowSpeed)
     local vector_position = cframe.Position;
-    local Speed = car == true and dependencies.variables.vehicle_speed or dependencies.variables.player_speed
+    local Speed = car and dependencies.variables.vehicle_speed or dependencies.variables.player_speed
     local y_level = 500;
     local higher_position = Vector3.new(vector_position.X, y_level, vector_position.Z); -- 500 studs above target position
  local start = Part.CFrame
@@ -125,7 +125,6 @@ function movement:move_to_position(Part, cframe, speed, car, target_vehicle, tri
 task.spawn(function()
 if TeleportUp ~= nil then
  repeat
-     Speed = car == true and dependencies.variables.vehicle_speed or dependencies.variables.player_speed
 Part.CFrame = CFrame.new(Part.CFrame.X, y_level, Part.CFrame.Z)
 Part.Velocity = Vector3.new()
 
